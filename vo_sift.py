@@ -225,9 +225,11 @@ def estimate_odometry():
 		plt.scatter(-x_coord, -z_coord, color='b')
 		plt.pause(0.00001)
 
+		plt.savefig("./docs/plot/"+str(frame_count)+".png", bbox_inches='tight')
+
 		frm = cv2.resize(frame1, (0,0), fx=0.5, fy=0.5)
 		cv2.imshow('Frame', frm)
-		print(frame_count)
+		print(frame_count, end = '\r')
 		frame_count += 1
 
 	cv2.destroyAllWindows()
