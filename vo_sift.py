@@ -172,25 +172,29 @@ def load_poses():
 
     return poses
 
+
 def read_image(frame_count):
 	filename = "./dataset/processedframes/" + str(frame_count)+".png"
 	image = cv2.imread(filename)
-	return image
+	scale_percent = 50
+	width = int(image.shape[1]*scale_percent/100)
+	height = int(image.shape[0]*scale_percent/100)
+	dim = (width,height)
+	resized = cv2.resize(image,dim,interpolation = cv2.INTER_AREA)
+	return resized
 
 
 def estimate_odometry():
 	global K
 
-	# features = load_features()
 	precalc_poses = load_poses() 	
 
 	frame_count = 1
 	init_point = np.array([0, 0, 0, 1])
-	H = np.eye(4)
 	t = np.array([0, 0, 0]).reshape(3,1)
 	R = np.eye(3)
 	camera_pose = np.eye(4)
-	while True:
+	while (frame_count < 3000):
 		frame1 = read_image(frame_count)
 		frame2 = read_image(frame_count + 1)
 		if (frame1 is None) or (frame2 is None) or (cv2.waitKey(1) == 27):
@@ -199,15 +203,16 @@ def estimate_odometry():
 		pose = precalc_poses.get(frame_name)
 
 		if pose is None:
-			# print("gela")
+
 			features1, features2 = extract_features(frame1, frame2, frame_name)
+
 			essential_mat, _ = cv2.findEssentialMat(features1[:, :2], features2[:, :2], focal=K[0, 0], pp=(K[0, 2], K[1, 2]), method=cv2.RANSAC, prob=0.999, threshold=0.5)
-			# E,C,R = get_E(F)
+
 			_, new_R, new_t, mask = cv2.recoverPose(essential_mat, features1[:, :2], features2[:, :2], K)
+
 			if np.linalg.det(new_R) < 0:
 				new_R = -new_R
 				new_t = -new_t
-			
 			precalc_poses[frame_name] = list(np.column_stack((new_R, new_t)))
 			with open("./dataset/pose.txt", 'w') as pose_file:
 				json.dump(precalc_poses, pose_file, cls=NumpyArrayEncoder)
@@ -223,13 +228,14 @@ def estimate_odometry():
 		z_coord = camera_pose[2, -1]
 
 		plt.scatter(-x_coord, -z_coord, color='b')
+		# plt.axis('equal')
 		plt.pause(0.00001)
 
-		plt.savefig("./docs/plot/"+str(frame_count)+".png", bbox_inches='tight')
+		# plt.savefig("./docs/plot/"+str(frame_count)+".png", bbox_inches='tight')
 
 		frm = cv2.resize(frame1, (0,0), fx=0.5, fy=0.5)
 		cv2.imshow('Frame', frm)
-		print(frame_count, end = '\r')
+		print("Current Frame: ",frame_count, end = '\r')
 		frame_count += 1
 
 	cv2.destroyAllWindows()
@@ -237,6 +243,6 @@ def estimate_odometry():
 
 if __name__ == '__main__':
 
-	K = np.array([[964.829,0,643.788],[0,964.829,484.408],[0,0,1]])
+	K = np.array([[3412.34,0,1975.58],[0,3400.2,1524.23],[0,0,1]])
 
 	estimate_odometry()
