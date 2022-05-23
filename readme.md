@@ -73,7 +73,15 @@ cd ~/Monocular-Visual-Odometry
 ```
 python3 vo_sift.py
 ```
+## Outputs
 
+Oxford Dataset:
+
+![Oxford Dataset](https://github.com/Atharva-Paralikar/Monocular-Visual-Odometry/blob/master/oxforddataset.gif)
+
+Custom Dataset
+
+![Oxford Dataset](https://github.com/Atharva-Paralikar/Monocular-Visual-Odometry/blob/master/customdataset.gif)
 
 Output link
 https://drive.google.com/drive/folders/18yW_rZ-sqJoPXj6TFAKzS_p4mec82GMU?usp=sharing
